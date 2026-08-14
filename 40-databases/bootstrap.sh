@@ -13,5 +13,4 @@ cd /home/ec2-user
 git clone https://github.com/amireddyravikumar/roboshop-ansible-v3.git
 cd roboshop-ansible-v3
 git pull
-echo "ravi"
-# ansible-playbook -e component=$component -e env=$environment roboshop.yaml
+ansible-playbook -e component=$component -e env=$environment roboshop.yaml
