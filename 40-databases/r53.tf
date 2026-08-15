@@ -7,7 +7,7 @@ resource "aws_route53_record" "mongodb" {
   records = [aws_instance.mongodb.private_ip]
 }
 # redis.amireddyravi.spae
-resource "aws_route53_record" "mongodb" {
+resource "aws_route53_record" "redis" {
   zone_id = var.zone_id
   name    = "redis-${var.environment}.${var.domain_name}"
   type    = "A"
