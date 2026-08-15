@@ -77,3 +77,43 @@ resource "terraform_data" "redis" {
      ]
   }
 }
+
+resource "aws_instance" "rabbitmq" {
+  ami = data.aws_ami.joindevops.id
+  instance_type = "t3.micro"
+  subnet_id                   =  local.database_subnet_id
+  vpc_security_group_ids      = [local.rabbitmq_sg_id]
+  # user_data = templatefile("${path.module}/bastion.sh.tftpl" ,{
+  #   partition_number = 4
+  #   extend_size = 30
+  # })
+
+  tags = merge(
+    {
+      Name = "${local.common_name}-rabbitmq"
+    },
+    local.common_tags
+  )
+}
+
+resource "terraform_data" "rabbitmq" {
+  triggers_replace = [
+    aws_instance.rabbitmq.id 
+  ]
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    password    = "DevOps321"
+    host        = aws_instance.rabbitmq.private_ip
+  }
+  provisioner "file" {
+    source = "bootstrap.sh"
+    destination = "/tmp/bootstrap.sh"
+  }
+  provisioner "remote-exec" {
+    inline = [ 
+      "chmod +x /tmp/bootstrap.sh",
+      "sudo sh /tmp/bootstrap.sh rabbitmq ${var.environment}"
+     ]
+  }
+}
