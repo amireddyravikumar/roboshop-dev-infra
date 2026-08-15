@@ -15,16 +15,32 @@ resource "aws_instance" "mongodb" {
     local.common_tags
   )
 }
+resource "aws_instance" "redis" {
+  ami = data.aws_ami.joindevops.id
+  instance_type = "t3.micro"
+  subnet_id                   =  local.database_subnet_id
+  vpc_security_group_ids      = [local.redis_sg_id]
+  # user_data = templatefile("${path.module}/bastion.sh.tftpl" ,{
+  #   partition_number = 4
+  #   extend_size = 30
+  # })
 
-resource "terraform_data" "mongodb" {
+  tags = merge(
+    {
+      Name = "${local.common_name}-redis"
+    },
+    local.common_tags
+  )
+}
+resource "terraform_data" "redis" {
   triggers_replace = [
-    aws_instance.mongodb.id 
+    aws_instance.redis.id 
   ]
   connection {
     type        = "ssh"
     user        = "ec2-user"
     password    = "DevOps321"
-    host        = aws_instance.mongodb.private_ip
+    host        = aws_instance.redis.private_ip
   }
   provisioner "file" {
     source = "bootstrap.sh"
@@ -33,7 +49,7 @@ resource "terraform_data" "mongodb" {
   provisioner "remote-exec" {
     inline = [ 
       "chmod +x /tmp/bootstrap.sh",
-      "sudo sh /tmp/bootstrap.sh mongodb ${var.environment}"
+      "sudo sh /tmp/bootstrap.sh redis ${var.environment}"
      ]
   }
 }
