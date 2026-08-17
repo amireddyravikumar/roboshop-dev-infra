@@ -5,6 +5,7 @@ resource "aws_route53_record" "mongodb" {
   type    = "A"
   ttl     = 1
   records = [aws_instance.mongodb.private_ip]
+  allow_overwrite = true
 }
 # redis-dev.amireddyravi.space
 resource "aws_route53_record" "redis" {
@@ -13,6 +14,7 @@ resource "aws_route53_record" "redis" {
   type    = "A"
   ttl     = 1
   records = [aws_instance.redis.private_ip]
+  allow_overwrite = true
 }
 # rabbitmq-dev.amireddyravi.space
 resource "aws_route53_record" "rabbitmq" {
