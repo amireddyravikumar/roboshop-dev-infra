@@ -1,8 +1,8 @@
 resource "aws_instance" "mongodb" {
-  ami = data.aws_ami.joindevops.id
-  instance_type = "t3.micro"
-  subnet_id                   =  local.database_subnet_id
-  vpc_security_group_ids      = [local.mongodb_sg_id]
+  ami                    = data.aws_ami.joindevops.id
+  instance_type          = "t3.micro"
+  subnet_id              = local.database_subnet_id
+  vpc_security_group_ids = [local.mongodb_sg_id]
   # user_data = templatefile("${path.module}/bastion.sh.tftpl" ,{
   #   partition_number = 4
   #   extend_size = 30
@@ -18,31 +18,31 @@ resource "aws_instance" "mongodb" {
 
 resource "terraform_data" "mongodb" {
   triggers_replace = [
-    aws_instance.mongodb.id 
+    aws_instance.mongodb.id
   ]
   connection {
-    type        = "ssh"
-    user        = "ec2-user"
-    password    = "DevOps321"
-    host        = aws_instance.mongodb.private_ip
+    type     = "ssh"
+    user     = "ec2-user"
+    password = "DevOps321"
+    host     = aws_instance.mongodb.private_ip
   }
   provisioner "file" {
-    source = "bootstrap.sh"
+    source      = "bootstrap.sh"
     destination = "/tmp/bootstrap.sh"
   }
   provisioner "remote-exec" {
-    inline = [ 
+    inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh mongodb ${var.environment}"
-     ]
+    ]
   }
 }
 
 resource "aws_instance" "redis" {
-  ami = data.aws_ami.joindevops.id
-  instance_type = "t3.micro"
-  subnet_id                   =  local.database_subnet_id
-  vpc_security_group_ids      = [local.redis_sg_id]
+  ami                    = data.aws_ami.joindevops.id
+  instance_type          = "t3.micro"
+  subnet_id              = local.database_subnet_id
+  vpc_security_group_ids = [local.redis_sg_id]
   # user_data = templatefile("${path.module}/bastion.sh.tftpl" ,{
   #   partition_number = 4
   #   extend_size = 30
@@ -58,31 +58,31 @@ resource "aws_instance" "redis" {
 
 resource "terraform_data" "redis" {
   triggers_replace = [
-    aws_instance.redis.id 
+    aws_instance.redis.id
   ]
   connection {
-    type        = "ssh"
-    user        = "ec2-user"
-    password    = "DevOps321"
-    host        = aws_instance.redis.private_ip
+    type     = "ssh"
+    user     = "ec2-user"
+    password = "DevOps321"
+    host     = aws_instance.redis.private_ip
   }
   provisioner "file" {
-    source = "bootstrap.sh"
+    source      = "bootstrap.sh"
     destination = "/tmp/bootstrap.sh"
   }
   provisioner "remote-exec" {
-    inline = [ 
+    inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh redis ${var.environment}"
-     ]
+    ]
   }
 }
 
 resource "aws_instance" "rabbitmq" {
-  ami = data.aws_ami.joindevops.id
-  instance_type = "t3.micro"
-  subnet_id                   =  local.database_subnet_id
-  vpc_security_group_ids      = [local.rabbitmq_sg_id]
+  ami                    = data.aws_ami.joindevops.id
+  instance_type          = "t3.micro"
+  subnet_id              = local.database_subnet_id
+  vpc_security_group_ids = [local.rabbitmq_sg_id]
   # user_data = templatefile("${path.module}/bastion.sh.tftpl" ,{
   #   partition_number = 4
   #   extend_size = 30
@@ -98,22 +98,64 @@ resource "aws_instance" "rabbitmq" {
 
 resource "terraform_data" "rabbitmq" {
   triggers_replace = [
-    aws_instance.rabbitmq.id 
+    aws_instance.rabbitmq.id
   ]
   connection {
-    type        = "ssh"
-    user        = "ec2-user"
-    password    = "DevOps321"
-    host        = aws_instance.rabbitmq.private_ip
+    type     = "ssh"
+    user     = "ec2-user"
+    password = "DevOps321"
+    host     = aws_instance.rabbitmq.private_ip
   }
   provisioner "file" {
-    source = "bootstrap.sh"
+    source      = "bootstrap.sh"
     destination = "/tmp/bootstrap.sh"
   }
   provisioner "remote-exec" {
-    inline = [ 
+    inline = [
       "chmod +x /tmp/bootstrap.sh",
       "sudo sh /tmp/bootstrap.sh rabbitmq ${var.environment}"
-     ]
+    ]
+  }
+}
+
+
+resource "aws_instance" "mysql" {
+  ami                    = data.aws_ami.joindevops.id
+  instance_type          = "t3.micro"
+  subnet_id              = local.database_subnet_id
+  vpc_security_group_ids = [local.mysql_sg_id]
+  iam_instance_profile = aws_iam_instance_profile.mysql.name
+  # user_data = templatefile("${path.module}/bastion.sh.tftpl" ,{
+  #   partition_number = 4
+  #   extend_size = 30
+  # })
+
+  tags = merge(
+    {
+      Name = "${local.common_name}-mysql"
+    },
+    local.common_tags
+  )
+}
+
+resource "terraform_data" "mysql" {
+  triggers_replace = [
+    aws_instance.mysql.id
+  ]
+  connection {
+    type     = "ssh"
+    user     = "ec2-user"
+    password = "DevOps321"
+    host     = aws_instance.mysql.private_ip
+  }
+  provisioner "file" {
+    source      = "bootstrap.sh"
+    destination = "/tmp/bootstrap.sh"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/bootstrap.sh",
+      "sudo sh /tmp/bootstrap.sh mysql ${var.environment}"
+    ]
   }
 }
