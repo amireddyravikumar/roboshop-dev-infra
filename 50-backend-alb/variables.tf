@@ -14,6 +14,3 @@ variable "domain_name" {
   type = string
   default = "amireddyravi.space"
 } 
-variable "mysql_root_password" {
-  type = string
-} 
