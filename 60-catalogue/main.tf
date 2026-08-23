@@ -39,3 +39,15 @@ resource "aws_ec2_instance_state" "catalogue" {
   state       = "stopped"
   depends_on = [ data.aws_ami.joindevops ]
 }
+
+resource "aws_ami_from_instance" "catalogue" {
+  name               = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}" # roboshop-dev-catalogue-###
+  source_instance_id = aws_instance.catalogue.id
+  depends_on = [ aws_ec2_instance_state.catalogue ]
+  tags = merge(
+    {
+      Name = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"
+    },
+    local.common_tags
+  )
+}
