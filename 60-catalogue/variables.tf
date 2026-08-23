@@ -10,7 +10,11 @@ variable "environment" {
 #   type = string
 #   default = "Z02709521C0H67BW0WAUD"
 # } 
-# variable "domain_name" {
-#   type = string
-#   default = "amireddyravi.space"
-# } 
+variable "domain_name" {
+  type = string
+  default = "amireddyravi.space"
+} 
+
+variable "app_version" {
+    default = "v3"
+}
