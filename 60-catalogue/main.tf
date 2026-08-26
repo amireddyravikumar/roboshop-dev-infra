@@ -37,13 +37,56 @@ resource "terraform_data" "catalogue" {
 resource "aws_ec2_instance_state" "catalogue" {
   instance_id = aws_instance.catalogue.id
   state       = "stopped"
-  depends_on = [ terraform_data.catalogue ]
+  depends_on  = [terraform_data.catalogue]
 }
 
 resource "aws_ami_from_instance" "catalogue" {
   name               = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}" # roboshop-dev-catalogue-###
   source_instance_id = aws_instance.catalogue.id
-  depends_on = [ aws_ec2_instance_state.catalogue ]
+  depends_on         = [aws_ec2_instance_state.catalogue]
+  tags = merge(
+    {
+      Name = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"
+    },
+    local.common_tags
+  )
+}
+
+resource "aws_launch_template" "catalogue" {
+  name = "${local.common_name}-catalogue"
+
+  image_id = aws_ami_from_instance.catalogue.id
+
+  instance_initiated_shutdown_behavior = "terminate"
+
+  instance_type = "t3.micro"
+
+  vpc_security_group_ids = [local.catalogue_sg_id]
+  update_default_version = true
+
+  # instace  tags
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = merge(
+      {
+        Name = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"
+      },
+      local.common_tags
+    )
+  }
+  # once instace created for volume tags
+  tag_specifications {
+    resource_type = "volume"
+
+    tags = merge(
+      {
+        Name = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"
+      },
+      local.common_tags
+    )
+  }
+  # launch Template resouce tags
   tags = merge(
     {
       Name = "${local.common_name}-catalogue-${var.app_version}-${aws_instance.catalogue.id}"
