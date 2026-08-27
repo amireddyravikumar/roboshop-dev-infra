@@ -182,7 +182,7 @@ resource "terraform_data" "catalogue_delete" {
   }
   # once auto scaling policy created EC2 isntance will be deleted where terraform is running 
   provisioner "local-exec" {
-    inline = [
+    command = [
       "aws ec2 terminate-instances --instance-ids ${aws_instance.catalogue.id}"
     ]
   }
